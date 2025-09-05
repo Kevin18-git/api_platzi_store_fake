@@ -155,7 +155,6 @@ def product_list(request):
             if p['category']['name'] == selected
         ]
 
-    # 🔎 Filtrar por búsqueda (ID, nombre o categoría)
     query = request.GET.get('q', '').strip().lower()
     if query:
         productos = [

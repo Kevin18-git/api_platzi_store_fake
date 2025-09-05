@@ -9,7 +9,7 @@
   </button>
 </div>
 
-<!-- Offcanvas de Categorías -->
+
 <div class="offcanvas offcanvas-start text-dark" tabindex="-1" id="offcanvasCategorias">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">Categorías</h5>
@@ -27,7 +27,7 @@
   </div>
 </div>
 
-<!-- Grilla de Productos -->
+
 <div class="row g-4">
   {% for producto in productos %}
   <div class="col-md-4">
@@ -60,7 +60,7 @@
     </div>
   </div>
 
-  <!-- Modal de Confirmación -->
+
   <div class="modal fade" id="deleteModal{{ producto.id }}" tabindex="-1"
       aria-labelledby="deleteModalLabel{{ producto.id }}" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
