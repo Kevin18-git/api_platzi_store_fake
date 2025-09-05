@@ -1,78 +1,117 @@
 {% extends 'products/base.html' %}
 
 {% block content %}
-
-<div class="row">
-    <aside class="col-md-3 mb-4">
-        <h5>Categorías</h5>
-        <ul class="list-group">
-            {% for cat in categorias %}
-            <a href="?category={{ cat }}"
-                class="list-group-item list-group-item-action {% if selected == cat %}active{% endif %}">
-                {{ cat }}
-            </a>
-            {% endfor %}
-        </ul>
-    </aside>
-
-    <section class="col-md-9">
-        <h1 class="mb-4">Productos</h1>
-        <div class="row g-4">
-            {% for producto in productos %}
-            <div class="col-md-4">
-                <div class="card h-100 text-dark">
-                    <img src="{{ producto.images.0 }}" class="card-img-top" alt="{{ producto.title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ producto.title }}</h5>
-                        <p class="card-text">
-                            Precio: ${{ producto.price }}<br>
-                            Categoría: {{ producto.category.name }}
-                        </p>
-                    </div>
-                    <div class="card-footer bg-transparent border-top-0 d-flex gap-2">
-                        <a href="{% url 'products:product_update' producto.id %}" class="btn btn-warning w-50">
-                            Actualizar
-                        </a>
-                        <button type="button" class="btn btn-danger w-50" data-bs-toggle="modal"
-                            data-bs-target="#deleteModal{{ producto.id }}">
-                            Eliminar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="deleteModal{{ producto.id }}" tabindex="-1"
-                aria-labelledby="deleteModalLabel{{ producto.id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content text-dark">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteModalLabel{{ producto.id }}">
-                                Confirmar eliminación
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body">
-                            ¿Estás seguro de que deseas eliminar
-                            <strong>{{ producto.title }}</strong>?
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                Cancelar
-                            </button>
-                            <form method="post" action="{% url 'products:product_delete' producto.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">
-                                    Sí, eliminar
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p>No se encontraron productos.</p>
-            {% endfor %}
-        </div>
-    </section>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="text-light">Productos</h1>
+  <!-- Botón para abrir categorías -->
+  <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCategorias">
+    <i class="bi bi-list"></i> Categorías
+  </button>
 </div>
+
+<!-- Offcanvas de Categorías -->
+<div class="offcanvas offcanvas-start text-dark" tabindex="-1" id="offcanvasCategorias">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Categorías</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="list-group shadow-sm rounded overflow-hidden">
+      {% for cat in categorias %}
+      <a href="?category={{ cat }}"
+         class="list-group-item list-group-item-action {% if selected == cat %}active{% endif %}">
+        {{ cat }}
+      </a>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<!-- Grilla de Productos -->
+<div class="row g-4">
+  {% for producto in productos %}
+  <div class="col-md-4">
+    <div class="card h-100 border-0 shadow-lg rounded-3 product-card">
+      <div class="image-container">
+        <img src="{{ producto.images.0 }}" class="card-img-top" alt="{{ producto.title }}">
+      </div>
+      <div class="card-body">
+        <h5 class="card-title fw-bold text-dark">{{ producto.title }}</h5>
+        <p class="card-text text-secondary mb-1">
+          <strong class="text-primary">Precio:</strong> ${{ producto.price }}
+        </p>
+        <p class="card-text text-muted">
+          <i class="bi bi-tags"></i> {{ producto.category.name }}
+        </p>
+<div class="p-2 mt-3 bg-light rounded small text-muted">
+  <p class="mb-0">{{ producto.description }}</p>
+</div>
+      </div>
+      <div class="card-footer d-flex gap-2 border-0 bg-white">
+        <a href="{% url 'products:product_update' producto.id %}" 
+           class="btn btn-outline-primary w-50">
+          <i class="bi bi-pencil-square"></i> Editar
+        </a>
+        <button type="button" class="btn btn-outline-danger w-50" data-bs-toggle="modal"
+            data-bs-target="#deleteModal{{ producto.id }}">
+          <i class="bi bi-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal fade" id="deleteModal{{ producto.id }}" tabindex="-1"
+      aria-labelledby="deleteModalLabel{{ producto.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0 rounded-3 text-dark">
+              <div class="modal-header bg-danger text-white">
+                  <h5 class="modal-title" id="deleteModalLabel{{ producto.id }}">
+                      Confirmar eliminación
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                  ¿Estás seguro de que deseas eliminar
+                  <strong>{{ producto.title }}</strong>?
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      Cancelar
+                  </button>
+                  <form method="post" action="{% url 'products:product_delete' producto.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">
+                          Sí, eliminar
+                      </button>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
+  {% empty %}
+  <p class="text-light">No se encontraron productos.</p>
+  {% endfor %}
+</div>
+
+<style>
+  .product-card {
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+  }
+  .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  .image-container {
+      overflow: hidden;
+      border-top-left-radius: .5rem;
+      border-top-right-radius: .5rem;
+  }
+  .image-container img {
+      transition: transform 0.4s ease;
+  }
+  .image-container:hover img {
+      transform: scale(1.1);
+  }
+</style>
 {% endblock %}

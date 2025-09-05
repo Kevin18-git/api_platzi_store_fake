@@ -120,7 +120,8 @@ def product_update(request, product_id):
         'product_id': product_id
     })
 
-
+def home(request):
+    return render(request, 'products/home.html')
 def product_delete(request, product_id):
     if request.method == 'POST':
         try:
@@ -133,3 +134,40 @@ def product_delete(request, product_id):
             pass
 
     return redirect('products:product_list')
+
+def product_list(request):
+    try:
+        response = requests.get(f"{base_url}products/", timeout=20)
+        response.raise_for_status()
+        productos = response.json()
+    except requests.RequestException:
+        productos = []
+
+    categorias = sorted({
+        p['category']['name']
+        for p in productos
+    })
+
+    selected = request.GET.get('category', 'All')
+    if selected != 'All':
+        productos = [
+            p for p in productos
+            if p['category']['name'] == selected
+        ]
+
+    # 🔎 Filtrar por búsqueda (ID, nombre o categoría)
+    query = request.GET.get('q', '').strip().lower()
+    if query:
+        productos = [
+            p for p in productos
+            if query in str(p['id']).lower()
+            or query in p['title'].lower()
+            or query in p['category']['name'].lower()
+        ]
+
+    context = {
+        'productos': productos,
+        'categorias': ['All'] + categorias,
+        'selected': selected,
+    }
+    return render(request, 'products/product_list.html', context)
