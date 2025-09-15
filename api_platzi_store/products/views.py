@@ -1,5 +1,6 @@
 import requests
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .forms import ProductForm
 
 base_url = "https://api.escuelajs.co/api/v1/"
@@ -17,11 +18,22 @@ def product_list(request):
         for p in productos
     })
 
+    # Filtrado por categoría
     selected = request.GET.get('category', 'All')
     if selected != 'All':
         productos = [
             p for p in productos
             if p['category']['name'] == selected
+        ]
+
+    # Búsqueda por texto
+    query = request.GET.get('q', '').strip().lower()
+    if query:
+        productos = [
+            p for p in productos
+            if query in str(p['id']).lower()
+            or query in p['title'].lower()
+            or query in p['category']['name'].lower()
         ]
 
     context = {
@@ -32,6 +44,7 @@ def product_list(request):
     return render(request, 'products/product_list.html', context)
 
 
+@login_required
 def product_create(request):
     try:
         resp_cat = requests.get(f'{base_url}categories/', timeout=10)
@@ -69,6 +82,7 @@ def product_create(request):
     })
 
 
+@login_required
 def product_update(request, product_id):
     try:
         resp = requests.get(f'{base_url}products/{product_id}', timeout=5)
@@ -122,6 +136,8 @@ def product_update(request, product_id):
 
 def home(request):
     return render(request, 'products/home.html')
+
+@login_required
 def product_delete(request, product_id):
     if request.method == 'POST':
         try:
@@ -134,39 +150,3 @@ def product_delete(request, product_id):
             pass
 
     return redirect('products:product_list')
-
-def product_list(request):
-    try:
-        response = requests.get(f"{base_url}products/", timeout=20)
-        response.raise_for_status()
-        productos = response.json()
-    except requests.RequestException:
-        productos = []
-
-    categorias = sorted({
-        p['category']['name']
-        for p in productos
-    })
-
-    selected = request.GET.get('category', 'All')
-    if selected != 'All':
-        productos = [
-            p for p in productos
-            if p['category']['name'] == selected
-        ]
-
-    query = request.GET.get('q', '').strip().lower()
-    if query:
-        productos = [
-            p for p in productos
-            if query in str(p['id']).lower()
-            or query in p['title'].lower()
-            or query in p['category']['name'].lower()
-        ]
-
-    context = {
-        'productos': productos,
-        'categorias': ['All'] + categorias,
-        'selected': selected,
-    }
-    return render(request, 'products/product_list.html', context)

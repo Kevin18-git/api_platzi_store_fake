@@ -13,7 +13,7 @@ class ProductForm(forms.Form):
         if categories:
             self.fields['category'].choices = categories
 
-        # 🔥 Aquí añado la clase form-control a todos los campos automáticamente
+
         for field in self.fields.values():
             existing_classes = field.widget.attrs.get('class', '')
             field.widget.attrs['class'] = f'{existing_classes} form-control'
